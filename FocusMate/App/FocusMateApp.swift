@@ -10,15 +10,13 @@ import UserNotifications
 
 @main
 struct FocusMateApp: App {
-    @State private var notificationService = NotificationService()
-    
     init() {
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
     }
     
     var body: some Scene {
         MenuBarExtra {
-            ContentView(notificationService: $notificationService)
+            ContentView()
         } label: {
             Label("FocusMate", systemImage: "circle.dotted.circle.fill")
         }
@@ -27,7 +25,7 @@ struct FocusMateApp: App {
         
         Window("Notifications Permission", id: "notificationsWindow") {
             NotificationPermissionView {
-                NotificationService().openSystemSettings()
+                NotificationService.openSystemSettings()
             }
             .frame(width: 340, height: 150)
         }

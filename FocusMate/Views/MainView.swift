@@ -14,16 +14,11 @@ struct MainView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                
                 HStack {
                     Text("FocusMate")
                         .font(.system(size: 22, weight: .bold))
-                    
                     Spacer()
-                    
-                    Button {
-                        isShowingHistory = true
-                    } label: {
+                    Button { isShowingHistory = true } label: {
                         Label("History", systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90")
                             .labelStyle(.iconOnly)
                     }
@@ -43,11 +38,11 @@ struct MainView: View {
                                 .foregroundStyle(.secondary)
                                 .padding(.bottom, 2)
                             
-                            Text("Keyboard: 120 types")
+                            Text("Keyboard: \(viewModel.keyboardCount) taps")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             
-                            Text("Mouse: 73 clicks")
+                            Text("Mouse: \(viewModel.mouseClickCount) clicks")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -68,7 +63,6 @@ struct MainView: View {
                 }
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity)
-                
             }
             .padding()
             .navigationDestination(isPresented: $isShowingHistory) {

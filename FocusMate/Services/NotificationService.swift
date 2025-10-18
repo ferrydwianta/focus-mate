@@ -2,19 +2,7 @@ import Foundation
 import UserNotifications
 import AppKit
 
-@Observable
-class NotificationService {
-    /// Requests notification authorization with alert, sound, and badge options.
-    /// - Throws: An error if the user denies authorization.
-    func requestAuthorization() async throws {
-        let center = UNUserNotificationCenter.current()
-        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
-        let granted = try await center.requestAuthorization(options: options)
-        if !granted {
-            throw AuthorizationError.denied
-        }
-    }
-    
+final class NotificationService {
     /// Schedules a local notification with the given title and body, triggered after 0.1 seconds.
     /// - Parameters:
     ///   - title: The notification title.
@@ -35,9 +23,27 @@ class NotificationService {
         }
     }
     
+    enum AuthorizationError: Error {
+        case denied
+    }
+}
+
+extension NotificationService {
+    /// Requests notification authorization with alert, sound, and badge options.
+    /// - Throws: An error if the user denies authorization.
+    static func requestAuthorization() async throws {
+        let center = UNUserNotificationCenter.current()
+        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+        let granted = try await center.requestAuthorization(options: options)
+        if !granted {
+            AppLogger.error("Notification access denied", category: .permissions)
+            throw AuthorizationError.denied
+        }
+    }
+    
     /// Checks current notification authorization status; requests authorization if not authorized.
     /// - Returns: A Boolean indicating whether notifications are authorized.
-    func ensureAuthorization() async -> Bool {
+    static func ensureAuthorization() async -> Bool {
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
         
@@ -56,7 +62,7 @@ class NotificationService {
         }
     }
     
-    func openSystemSettings() {
+    static func openSystemSettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
             NSWorkspace.shared.open(url)
             return
@@ -64,9 +70,5 @@ class NotificationService {
         if let url = URL(string: "x-apple.systempreferences:") {
             NSWorkspace.shared.open(url)
         }
-    }
-    
-    enum AuthorizationError: Error {
-        case denied
     }
 }

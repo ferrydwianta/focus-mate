@@ -11,16 +11,30 @@ import SwiftUI
 class MainViewModel {
     var notificationService: NotificationService
     var storageService: StorageService
+    var activityMonitor: ActivityMonitorService
     var focusStarted: Bool = false
     var elapsedText: String = "00 hrs 00 m 00 s"
+    var keyboardCount: Int = 0
+    var mouseClickCount: Int = 0
     
     private var timer: Timer?
     private var startDate: Date?
     private var accumulatedTime: TimeInterval = 0
     
-    init(notificationService: NotificationService = NotificationService(), storageService: StorageService = StorageService()) {
+    init(
+        notificationService: NotificationService = NotificationService(),
+        storageService: StorageService = StorageService(),
+        activityMonitor: ActivityMonitorService = ActivityMonitorService()
+    ) {
         self.notificationService = notificationService
         self.storageService = storageService
+        self.activityMonitor = activityMonitor
+        
+        activityMonitor.onUpdate = { [weak self] key, mouse in
+            guard let self else { return }
+            self.keyboardCount = key
+            self.mouseClickCount = mouse
+        }
     }
     
     func startFocus() {
@@ -32,14 +46,16 @@ class MainViewModel {
         
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            self.updateElapsedText()
+            self?.updateElapsedText()
         }
         timer?.fire()
         
+        activityMonitor.reset()
+        activityMonitor.start()
+        
         Task {
             let title = "Focus started"
-            let body = "When you start focus mode, the app quietly tracks your computer activity (keystrokes and app changes) to help you stay aware and productive."
+            let body = "When you start focus mode, the app quietly tracks your computer activity (keystroke and click counts) to help you stay aware and productive."
             await notificationService.send(title: title, body: body)
         }
     }
@@ -54,8 +70,18 @@ class MainViewModel {
             sessionStart = start
         }
         let duration = accumulatedTime
+        
+        activityMonitor.stop()
+        let counts = activityMonitor.snapshotCounts()
+        
         if let sessionStart {
-            storageService.saveSession(start: sessionStart, end: end, duration: duration)
+            storageService.saveSession(
+                start: sessionStart,
+                end: end,
+                duration: duration,
+                keyboardCount: counts.keyboard,
+                mouseClickCount: counts.mouse
+            )
         }
         startDate = nil
         
@@ -74,21 +100,11 @@ class MainViewModel {
     }
     
     func toggleFocus() {
-        if focusStarted {
-            stopFocus()
-        } else {
-            startFocus()
-        }
+        focusStarted ? stopFocus() : startFocus()
     }
     
     private func updateElapsedText() {
-        let runningTime: TimeInterval
-        if let start = startDate {
-            runningTime = Date().timeIntervalSince(start)
-        } else {
-            runningTime = 0
-        }
-        
+        let runningTime = startDate.map { Date().timeIntervalSince($0) } ?? 0
         let total = accumulatedTime + runningTime
         elapsedText = total.elapsedText()
     }
@@ -99,6 +115,7 @@ class MainViewModel {
         startDate = nil
         accumulatedTime = 0
         updateElapsedText()
+        keyboardCount = 0
+        mouseClickCount = 0
     }
 }
-

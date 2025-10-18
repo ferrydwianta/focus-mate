@@ -5,7 +5,7 @@ enum LogCategory: String {
     case app = "App"
     case storage = "Storage"
     case notifications = "Notifications"
-    case focus = "Focus"
+    case permissions = "Permissions"
 }
 
 struct AppLogger {

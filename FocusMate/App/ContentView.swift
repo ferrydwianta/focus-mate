@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Binding var notificationService: NotificationService
-    
     @Environment(\.openWindow) private var openWindow
     @State private var hasCheckedAuth = false
     
@@ -18,14 +16,17 @@ struct ContentView: View {
             .task {
                 guard !hasCheckedAuth else { return }
                 hasCheckedAuth = true
-                let authorized = await notificationService.ensureAuthorization()
-                if !authorized {
+                
+                let notificationsGranted = await NotificationService.ensureAuthorization()
+                if !notificationsGranted {
                     openWindow(id: "notificationsWindow")
                 }
+                
+                _ = ActivityMonitorService.isInputMonitoringAuthorized()
             }
     }
 }
 
 #Preview {
-    ContentView(notificationService: .constant(NotificationService()))
+    ContentView()
 }

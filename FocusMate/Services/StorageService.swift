@@ -2,9 +2,8 @@ import Foundation
 import SwiftData
 
 final class StorageService {
-    
     let container: ModelContainer
-
+    
     init() {
         do {
             let schema = Schema([FocusSession.self])
@@ -14,10 +13,16 @@ final class StorageService {
             fatalError("Failed to initialize ModelContainer: \(error)")
         }
     }
-
-    func saveSession(start: Date, end: Date, duration: TimeInterval) {
+    
+    func saveSession(start: Date, end: Date, duration: TimeInterval, keyboardCount: Int, mouseClickCount: Int) {
         let context = ModelContext(container)
-        let session = FocusSession(startTime: start, endTime: end, duration: duration)
+        let session = FocusSession(
+            startTime: start,
+            endTime: end,
+            duration: duration,
+            keyboardCount: keyboardCount,
+            mouseClickCount: mouseClickCount
+        )
         context.insert(session)
         do {
             try context.save()
@@ -26,7 +31,7 @@ final class StorageService {
             AppLogger.error("Failed to save FocusSession: \(error.localizedDescription)", category: .storage)
         }
     }
-
+    
     func fetchSessions() -> [FocusSession] {
         let context = ModelContext(container)
         let descriptor = FetchDescriptor<FocusSession>(
