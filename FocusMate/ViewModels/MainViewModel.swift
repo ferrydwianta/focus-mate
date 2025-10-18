@@ -10,6 +10,7 @@ import SwiftUI
 @Observable
 class MainViewModel {
     var notificationService: NotificationService
+    var storageService: StorageService
     var focusStarted: Bool = false
     var elapsedText: String = "00 hrs 00 m 00 s"
     
@@ -17,8 +18,9 @@ class MainViewModel {
     private var startDate: Date?
     private var accumulatedTime: TimeInterval = 0
     
-    init(notificationService: NotificationService = NotificationService()) {
+    init(notificationService: NotificationService = NotificationService(), storageService: StorageService = StorageService()) {
         self.notificationService = notificationService
+        self.storageService = storageService
     }
     
     func startFocus() {
@@ -45,8 +47,15 @@ class MainViewModel {
     func stopFocus() {
         guard focusStarted else { return }
         
+        let end = Date()
+        var sessionStart: Date? = nil
         if let start = startDate {
-            accumulatedTime += Date().timeIntervalSince(start)
+            accumulatedTime += end.timeIntervalSince(start)
+            sessionStart = start
+        }
+        let duration = accumulatedTime
+        if let sessionStart {
+            storageService.saveSession(start: sessionStart, end: end, duration: duration)
         }
         startDate = nil
         

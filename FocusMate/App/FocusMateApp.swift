@@ -7,7 +7,6 @@
 
 import SwiftUI
 import UserNotifications
-import OSLog
 
 @main
 struct FocusMateApp: App {
@@ -39,10 +38,8 @@ struct FocusMateApp: App {
 final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationDelegate()
     
-    private let logger = Logger(subsystem: "com.yourcompany.FocusMate", category: "Notifications")
-    
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        logger.debug("willPresent called for notification: \(notification.request.identifier)")
+        AppLogger.debug("willPresent called for notification: \(notification.request.identifier)", category: .notifications)
         return [.banner, .list, .sound, .badge]
     }
     
