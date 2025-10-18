@@ -34,7 +34,7 @@ struct MainView: View {
             if viewModel.focusStarted {
                 GroupBox {
                     VStack(alignment: .leading) {
-                        Text("01 hrs 00 m")
+                        Text(viewModel.elapsedText)
                             .font(.largeTitle)
                         
                         Text("Current Session")
