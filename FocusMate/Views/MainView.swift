@@ -9,69 +9,76 @@ import SwiftUI
 
 struct MainView: View {
     @State private var viewModel = MainViewModel()
+    @State private var isShowingHistory = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("FocusMate")
-                    .font(.system(size: 22, weight: .bold))
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
                 
-                Spacer()
+                HStack {
+                    Text("FocusMate")
+                        .font(.system(size: 22, weight: .bold))
+                    
+                    Spacer()
+                    
+                    Button {
+                        isShowingHistory = true
+                    } label: {
+                        Label("History", systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90")
+                            .labelStyle(.iconOnly)
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.circle)
+                    .controlSize(.large)
+                }
+                
+                if viewModel.focusStarted {
+                    GroupBox {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(viewModel.elapsedText)
+                                .font(.largeTitle)
+                            
+                            Text("Current Session")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .padding(.bottom, 2)
+                            
+                            Text("Keyboard: 120 types")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            
+                            Text("Mouse: 73 clicks")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
                 
                 Button {
-                    
+                    viewModel.toggleFocus()
                 } label: {
-                    Label("History", systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90")
-                        .labelStyle(.iconOnly)
+                    Text(viewModel.focusStarted ? "Stop Focus" : "Start Focus")
+                        .font(.title2)
+                        .frame(maxWidth: .infinity, minHeight: 42)
+                        .background(viewModel.focusStarted ? .red : .indigo)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .foregroundStyle(.white)
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.circle)
-                .controlSize(.large)
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
+                
             }
-            
-            Spacer()
-            
-            if viewModel.focusStarted {
-                GroupBox {
-                    VStack(alignment: .leading) {
-                        Text(viewModel.elapsedText)
-                            .font(.largeTitle)
-                        
-                        Text("Current Session")
-                            .font(.caption)
-                            .padding(.bottom, 4)
-                        
-                        Text("Keyboard: 120 types")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        
-                        Text("Mouse: 73 clicks")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
+            .padding()
+            .navigationDestination(isPresented: $isShowingHistory) {
+                FocusHistoryView()
             }
-            
-            Button {
-                viewModel.toggleFocus()
-            } label: {
-                Text(viewModel.focusStarted ? "Stop Focus" : "Start Focus")
-                    .font(.title2)
-                    .frame(maxWidth: .infinity, minHeight: 42)
-                    .background(viewModel.focusStarted ? Color.red : Color.indigo)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
         }
-        .padding()
     }
 }
 
 #Preview {
     MainView()
-        .frame(width: 300, height: 400)
+        .frame(width: 340, height: 440)
 }

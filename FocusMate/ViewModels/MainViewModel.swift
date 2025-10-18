@@ -90,17 +90,7 @@ class MainViewModel {
         }
         
         let total = accumulatedTime + runningTime
-        let hours = Int(total) / 3600
-        let minutes = (Int(total) % 3600) / 60
-        let seconds = Int(total) % 60
-        
-        let formatted: String
-        if hours > 0 {
-            formatted = String(format: "%02d hrs %02d m %02d s", hours, minutes, seconds)
-        } else {
-            formatted = String(format: "%02d m %02d s", minutes, seconds)
-        }
-        elapsedText = formatted
+        elapsedText = total.elapsedText()
     }
     
     func resetElapsed() {
