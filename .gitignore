@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific files
+*.xcuserstate
+xcuserdata/
+*.xcbkptlist
+*.xcscmblueprint
+
+# Build products
+build/
+DerivedData/
+
+# Swift Package Manager
+/.build/
+.swiftpm/
+
+# Other
+*.moved-aside
+*.xcuserdatad
