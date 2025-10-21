@@ -13,17 +13,17 @@ final class AppActivationEntity {
     @Attribute(.unique) var id: UUID
     var bundleID: String?
     var appName: String
-    var timestamp: Date
-
+    var timestamps: [Date]
+    
     @Relationship(inverse: \FocusSessionEntity.activations) var session: FocusSessionEntity?
-
+    
     init(id: UUID = UUID(),
          bundleID: String?,
          appName: String,
-         timestamp: Date) {
+         timestamps: [Date]) {
         self.id = id
         self.bundleID = bundleID
         self.appName = appName
-        self.timestamp = timestamp
+        self.timestamps = timestamps
     }
 }

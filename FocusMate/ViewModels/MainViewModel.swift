@@ -132,5 +132,3 @@ class MainViewModel {
         appActivationTracker.reset()
     }
 }
-
-// TODO: show data using Dictionary(grouping: session.activations, by: \.appName)

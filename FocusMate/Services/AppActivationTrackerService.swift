@@ -11,7 +11,7 @@ import AppKit
 struct AppActivation {
     let bundleID: String?
     let appName: String
-    let timestamp: Date
+    var timestamps: [Date]
 }
 
 final class AppActivationTrackerService {
@@ -65,13 +65,15 @@ final class AppActivationTrackerService {
     }
     
     private func record(app: NSRunningApplication) {
-        activations.append(
-            AppActivation(
-                bundleID: app.bundleIdentifier,
-                appName: app.localizedName ?? "Unknown",
-                timestamp: Date()
-            )
-        )
+        let bundleID = app.bundleIdentifier
+        let appName = app.localizedName ?? "Unknown"
+        let timestamp = Date()
+        
+        if let idx = activations.firstIndex(where: { $0.bundleID == bundleID && $0.appName == appName }) {
+            activations[idx].timestamps.append(timestamp)
+        } else {
+            activations.append(AppActivation(bundleID: bundleID, appName: appName, timestamps: [timestamp]))
+        }
     }
     
     func reset() {

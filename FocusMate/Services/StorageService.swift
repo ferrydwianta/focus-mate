@@ -37,7 +37,7 @@ final class StorageService {
             let e = AppActivationEntity(
                 bundleID: a.bundleID,
                 appName: a.appName,
-                timestamp: a.timestamp
+                timestamps: a.timestamps
             )
             e.session = session
             context.insert(e)
