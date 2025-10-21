@@ -36,7 +36,7 @@ struct FocusHistoryView: View {
 }
 
 private struct SessionRow: View {
-    let session: FocusSession
+    let session: FocusSessionEntity
     @Environment(\.colorScheme) private var scheme
     
     var body: some View {

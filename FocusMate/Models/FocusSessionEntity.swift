@@ -2,13 +2,15 @@ import Foundation
 import SwiftData
 
 @Model
-final class FocusSession {
+final class FocusSessionEntity {
     @Attribute(.unique) var id: UUID
     var startTime: Date
     var endTime: Date
     var duration: TimeInterval
     var keyboardCount: Int
     var mouseClickCount: Int
+
+    @Relationship var activations: [AppActivationEntity] = []
 
     init(
         id: UUID = UUID(),

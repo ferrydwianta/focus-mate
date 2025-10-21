@@ -12,6 +12,7 @@ class MainViewModel {
     var notificationService: NotificationService
     var storageService: StorageService
     var activityMonitor: ActivityMonitorService
+    var appActivationTracker: AppActivationTrackerService
     var focusStarted: Bool = false
     var elapsedText: String = "00 hrs 00 m 00 s"
     var keyboardCount: Int = 0
@@ -24,11 +25,13 @@ class MainViewModel {
     init(
         notificationService: NotificationService = NotificationService(),
         storageService: StorageService = StorageService(),
-        activityMonitor: ActivityMonitorService = ActivityMonitorService()
+        activityMonitor: ActivityMonitorService = ActivityMonitorService(),
+        appActivationTracker: AppActivationTrackerService = AppActivationTrackerService()
     ) {
         self.notificationService = notificationService
         self.storageService = storageService
         self.activityMonitor = activityMonitor
+        self.appActivationTracker = appActivationTracker
         
         activityMonitor.onUpdate = { [weak self] key, mouse in
             guard let self else { return }
@@ -53,6 +56,10 @@ class MainViewModel {
         activityMonitor.reset()
         activityMonitor.start()
         
+        appActivationTracker.reset()
+        appActivationTracker.start()
+        appActivationTracker.recordCurrentActivation()
+        
         Task {
             let title = "Focus started"
             let body = "When you start focus mode, the app quietly tracks your computer activity (keystroke and click counts) to help you stay aware and productive."
@@ -74,17 +81,21 @@ class MainViewModel {
         activityMonitor.stop()
         let counts = activityMonitor.snapshotCounts()
         
+        let activations = appActivationTracker.activations
+        appActivationTracker.stop()
+        
         if let sessionStart {
             storageService.saveSession(
                 start: sessionStart,
                 end: end,
                 duration: duration,
                 keyboardCount: counts.keyboard,
-                mouseClickCount: counts.mouse
+                mouseClickCount: counts.mouse,
+                activations: activations
             )
         }
-        startDate = nil
         
+        startDate = nil
         timer?.invalidate()
         timer = nil
         
@@ -93,9 +104,10 @@ class MainViewModel {
         withAnimation { focusStarted = false }
         
         Task {
-            let title = "Focus stopped"
-            let body = "Focus mode has ended."
-            await notificationService.send(title: title, body: body)
+            await notificationService.send(
+                title: "Focus stopped",
+                body: "Session saved."
+            )
         }
     }
     
@@ -117,5 +129,8 @@ class MainViewModel {
         updateElapsedText()
         keyboardCount = 0
         mouseClickCount = 0
+        appActivationTracker.reset()
     }
 }
+
+// TODO: show data using Dictionary(grouping: session.activations, by: \.appName)

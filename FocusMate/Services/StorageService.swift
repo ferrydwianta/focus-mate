@@ -6,7 +6,7 @@ final class StorageService {
     
     init() {
         do {
-            let schema = Schema([FocusSession.self])
+            let schema = Schema([FocusSessionEntity.self, AppActivationEntity.self])
             let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             container = try ModelContainer(for: schema, configurations: [configuration])
         } catch {
@@ -14,9 +14,17 @@ final class StorageService {
         }
     }
     
-    func saveSession(start: Date, end: Date, duration: TimeInterval, keyboardCount: Int, mouseClickCount: Int) {
+    func saveSession(
+        start: Date,
+        end: Date,
+        duration: TimeInterval,
+        keyboardCount: Int,
+        mouseClickCount: Int,
+        activations: [AppActivation]
+    ) {
         let context = ModelContext(container)
-        let session = FocusSession(
+        
+        let session = FocusSessionEntity(
             startTime: start,
             endTime: end,
             duration: duration,
@@ -24,17 +32,28 @@ final class StorageService {
             mouseClickCount: mouseClickCount
         )
         context.insert(session)
+        
+        for a in activations {
+            let e = AppActivationEntity(
+                bundleID: a.bundleID,
+                appName: a.appName,
+                timestamp: a.timestamp
+            )
+            e.session = session
+            context.insert(e)
+        }
+        
         do {
             try context.save()
-            AppLogger.debug("Saved FocusSession: \(session.id.uuidString)", category: .storage)
+            AppLogger.debug("Saved FocusSession \(session.id) with \(activations.count) activation(s)", category: .storage)
         } catch {
             AppLogger.error("Failed to save FocusSession: \(error.localizedDescription)", category: .storage)
         }
     }
     
-    func fetchSessions() -> [FocusSession] {
+    func fetchSessions() -> [FocusSessionEntity] {
         let context = ModelContext(container)
-        let descriptor = FetchDescriptor<FocusSession>(
+        let descriptor = FetchDescriptor<FocusSessionEntity>(
             sortBy: [SortDescriptor(\.startTime, order: .reverse)]
         )
         do {

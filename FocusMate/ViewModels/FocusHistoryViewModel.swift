@@ -10,7 +10,7 @@ import SwiftUI
 @Observable
 class FocusHistoryViewModel {
     var storageService: StorageService
-    var sessions = [FocusSession]()
+    var sessions = [FocusSessionEntity]()
     
     init(storageService: StorageService = StorageService()) {
         self.storageService = storageService
