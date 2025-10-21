@@ -27,4 +27,12 @@ final class FocusSessionEntity {
         self.keyboardCount = keyboardCount
         self.mouseClickCount = mouseClickCount
     }
+    
+    static let example = FocusSessionEntity(
+        startTime: Date(),
+        endTime: Date().addingTimeInterval(3600),
+        duration: 3600,
+        keyboardCount: 100,
+        mouseClickCount: 50
+    )
 }

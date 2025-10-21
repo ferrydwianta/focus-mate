@@ -45,6 +45,10 @@ struct MainView: View {
                             Text("Mouse: \(viewModel.mouseClickCount) clicks")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            
+                            Text("Apps Opened: \(viewModel.appActivationTracker.activations.count)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                         .padding(8)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -66,7 +70,7 @@ struct MainView: View {
             }
             .padding()
             .navigationDestination(isPresented: $isShowingHistory) {
-                FocusHistoryView()
+                FocusSessionHistoryView()
             }
         }
     }
